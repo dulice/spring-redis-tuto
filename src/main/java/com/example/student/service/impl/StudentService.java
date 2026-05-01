@@ -1,12 +1,15 @@
 package com.example.student.service.impl;
 
 import com.example.student.business.StudentCache;
+import com.example.student.config.RedisUtil;
 import com.example.student.dto.*;
 import com.example.student.entity.Student;
 import com.example.student.exception.BusinessException;
 import com.example.student.repository.StudentRepository;
 import com.example.student.service.IStudentService;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,8 @@ import java.util.Objects;
 public class StudentService implements IStudentService {
     private final StudentRepository studentRepository;
     private final StudentCache studentCache;
+    private final RedissonClient redissonClient;
+    private final RedisUtil redisUtil;
 
     @Override
     public ResponseEntity<?> register(RegisterRequest registerRequest) {
@@ -60,13 +65,20 @@ public class StudentService implements IStudentService {
 
     @Override
     public ResponseEntity<?> processPayment(PaymentRequest paymentRequest) {
+        String key = redisUtil.getKey("::payment" + paymentRequest.getStudentId());
+        RLock lock = redissonClient.getLock(key);
+        lock.lock();
+        try {
+            System.out.println("Detect payment");
+        } finally {
+            lock.unlock();
+        }
         return null;
     }
 
     @Override
     public ResponseEntity<?> getStudent(String studentId) {
-        Student student = studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+        Student student = studentCache.studentSet(studentId);
 
         StudentResponse response = StudentResponse.toDto(student);
 

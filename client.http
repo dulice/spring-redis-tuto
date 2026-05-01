@@ -1,11 +1,25 @@
-### Create a new entry
+### login
 POST http://localhost:8080/api/students/login
 Content-Type: application/json
 
 {
   "email": "john2@example.com",
-  "password": "password1234"
+  "password": "password123"
 }
 
 ### logout
-POST http://localhost:8080/api/students/logout/1
+POST http://localhost:8080/api/students/logout/2
+
+### get student
+GET http://localhost:8080/api/students/3
+
+### payment
+POST http://localhost:8080/api/students/payment
+Content-Type: application/json
+
+{
+  "studentId": "1",
+  "amount": 100,
+  "paymentMethod": "cash"
+}
+
