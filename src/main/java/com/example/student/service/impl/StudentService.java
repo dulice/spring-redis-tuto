@@ -32,12 +32,18 @@ public class StudentService implements IStudentService {
 
     @Override
     public ResponseEntity<?> login(LoginRequest loginRequest) {
-        Student student = studentCache.getStudentCache(loginRequest.getEmail());
+
+        String email = loginRequest.getEmail();
+
+        studentCache.checkDuplicateLogin(email);
+        Student student = studentCache.getStudentCache(email);
 
         if(!Objects.equals(student.getPassword(), loginRequest.getPassword())) {
+            studentCache.loginCounter(email);
             throw new BusinessException("Incorrect pwd");
         }
-
+        studentCache.resetCounter(email);
+        studentCache.releaseLock(email);
         LoginResponse response = LoginResponse.toDto(student, "123");
         response.setMessage("Login successful");
 

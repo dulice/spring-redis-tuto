@@ -1,0 +1,11 @@
+### Create a new entry
+POST http://localhost:8080/api/students/login
+Content-Type: application/json
+
+{
+  "email": "john2@example.com",
+  "password": "password1234"
+}
+
+### logout
+POST http://localhost:8080/api/students/logout/1

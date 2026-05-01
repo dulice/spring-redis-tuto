@@ -1,22 +1,21 @@
 package com.example.student.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
-@Configuration
+@RequiredArgsConstructor
+@Service
 public class RedisUtil {
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final String redisKeyPrefix = "std";
 
-    @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    public String getKey(String key) {
+        return redisKeyPrefix + "::" + key;
+    }
 
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .disableCachingNullValues();
-
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(config)
-                .build();
+    public void deleteKey(String key) {
+        String prefixKey = getKey(key);
+        redisTemplate.delete(prefixKey);
     }
 }
