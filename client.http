@@ -1,4 +1,17 @@
 ### login
+POST http://localhost:8080/api/students/register
+Content-Type: application/json
+
+{
+  "studentId": "3",
+  "name": "john",
+  "email": "john2@example.com",
+  "password": "password123",
+  "age": 22,
+  "major": "cs"
+}
+
+### login
 POST http://localhost:8080/api/students/login
 Content-Type: application/json
 

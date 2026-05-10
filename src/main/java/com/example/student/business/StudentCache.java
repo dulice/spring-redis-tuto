@@ -6,10 +6,7 @@ import com.example.student.entity.Student;
 import com.example.student.exception.BusinessException;
 import com.example.student.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RAtomicLong;
-import org.redisson.api.RBucket;
-import org.redisson.api.RSetCache;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -75,12 +72,23 @@ public class StudentCache {
     }
 
     public Student studentSet(String studentId) {
+        String rkey = redisUtil.getKey("RateLimit:" + studentId);
+        if(checkIsOverLimit(rkey)) {
+            throw new BusinessException("Too many request");
+        }
         Student student = studentRepository.findByStudentId(studentId).orElse(null);
         String key = redisUtil.getKey("students");
         RSetCache<Student> students = redissonClient.getSetCache(key);
         students.add(student, 30, TimeUnit.SECONDS);
 
         return student;
+    }
+
+    public boolean checkIsOverLimit(String key) {
+        RRateLimiter rateLimiter = redissonClient.getRateLimiter(key);
+        rateLimiter.trySetRate(RateType.OVERALL, 5, Duration.ofSeconds(30));
+        boolean isAllowed = rateLimiter.tryAcquire();
+        return !isAllowed;
     }
 
 }

@@ -1,0 +1,21 @@
+services:
+  redis-db:
+    image: mysql:latest
+    container_name: studentDB
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: studentDB
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis-cache:
+    image: redis:latest
+    container_name: std-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql_data:
